@@ -18,6 +18,10 @@ const User=sequelize.define(
             allowNull:false,
             unique:true
         },
+        password:{
+            type:DataTypes.STRING,
+            allowNull:false
+        },
         role:{
             type:DataTypes.ENUM("admin","voter"),
             defaultValue:"voter"
