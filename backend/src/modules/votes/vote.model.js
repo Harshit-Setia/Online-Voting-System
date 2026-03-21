@@ -29,9 +29,7 @@ const Vote = sequelize.define(
     tableName: "votes",
     timestamps: true,
 
-    /*
-    Prevent duplicate voting
-    */
+    // Prevent duplicate voting
     indexes: [
       {
         unique: true,
