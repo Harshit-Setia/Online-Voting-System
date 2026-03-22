@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken"
-import { JWT_SECRET } from "../utils/constants"
+import { JWT_SECRET } from "../utils/constants.js"
 
 const authMiddleware=(req,res,next)=>{
     try {
