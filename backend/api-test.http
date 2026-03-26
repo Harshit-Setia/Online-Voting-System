@@ -1,0 +1,122 @@
+@baseUrl = http://localhost:56478/api
+@token = 
+
+### 🔐 Register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Harshit",
+  "email": "harshit@email.com",
+  "password": "123456"
+}
+
+
+### 🔐 Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "harshit@email.com",
+  "password": "123456"
+}
+
+
+### 👤 Get Profile
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{token}}
+
+
+### 👤 Get All Users (Admin)
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+
+### 👤 Delete User
+DELETE {{baseUrl}}/users/1
+Authorization: Bearer {{token}}
+
+
+### 🗳️ Create Election (Admin)
+POST {{baseUrl}}/elections
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Student Election",
+  "description": "College voting",
+  "start_time": "2026-03-26T10:00:00Z",
+  "end_time": "2026-03-26T20:00:00Z"
+}
+
+
+### 🗳️ Get All Elections
+GET {{baseUrl}}/elections
+
+
+### 🗳️ Get Single Election
+GET {{baseUrl}}/elections/1
+
+
+### 🗳️ Start Election (Admin)
+PUT {{baseUrl}}/elections/start/2
+Authorization: Bearer {{token}}
+
+
+### 🗳️ End Election (Admin)
+PUT {{baseUrl}}/elections/end/2
+Authorization: Bearer {{token}}
+
+
+### 🧑‍💼 Add Candidate (with image)
+POST {{baseUrl}}/candidates
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="name"
+
+Alice
+--boundary
+Content-Disposition: form-data; name="party"
+
+Party A
+--boundary
+Content-Disposition: form-data; name="election_id"
+
+2
+--boundary
+Content-Disposition: form-data; name="photo"; filename="photo.jpg"
+Content-Type: image/jpeg
+
+< ./photo.jpg
+--boundary--
+
+
+
+### 🧑‍💼 Get Candidates
+GET {{baseUrl}}/candidates/2
+
+
+### 🧑‍💼 Delete Candidate
+DELETE {{baseUrl}}/candidates/1
+Authorization: Bearer {{token}}
+
+
+### 🗳️ Cast Vote
+POST {{baseUrl}}/votes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "candidate_id": 3,
+  "election_id": 2
+}
+
+
+### 📊 Get Results
+GET {{baseUrl}}/results/2
+
+
+### 📊 Get Winner
+GET {{baseUrl}}/results/2/winner

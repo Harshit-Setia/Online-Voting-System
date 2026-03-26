@@ -20,9 +20,9 @@ export const castVote=async({userId,candidateId,electionId})=>{
         throw Error("Candidate not found")
     }
 
-    if(candidate.electionId!==electionId){
-        throw Error("Candidate does not belong to this election")
-    }
+    if (Number(candidate.election_id) !== Number(electionId)) {
+  throw new Error("Candidate does not belong to this election");
+}
 
     try {
         const vote=await Vote.create({

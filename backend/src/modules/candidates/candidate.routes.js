@@ -12,7 +12,7 @@ import {
 const router = express.Router()
 
 // admin
-router.post("/", authMiddleware, roleMiddleware("admin"),upload, addCandidate)
+router.post("/", authMiddleware, roleMiddleware("admin"),upload.single("photo"), addCandidate)
 router.delete("/:id", authMiddleware, roleMiddleware("admin"), deleteCandidate)
 
 // public

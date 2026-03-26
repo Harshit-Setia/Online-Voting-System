@@ -3,7 +3,8 @@ import { JWT_SECRET } from "../utils/constants.js"
 
 const authMiddleware=(req,res,next)=>{
     try {
-        const authHeader=req.header.authorization
+        const authHeader=req.headers.authorization
+
         if(!authHeader){
             return res.status(401).json({error:"No token provided"})
         }
