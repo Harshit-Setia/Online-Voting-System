@@ -35,8 +35,13 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[#020617] text-[#F8FAFC] relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#3B82F6] opacity-[0.05] blur-[100px] rounded-full pointer-events-none translate-x-1/2 -translate-y-1/2"></div>
+    <div className="min-h-screen flex items-center justify-center p-6 text-[#F8FAFC] relative overflow-hidden">
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/wall.jpeg')", filter: 'blur(6px) scale(1.03)', transformOrigin: 'center' }}
+      ></div>
+      <div className="absolute inset-0 bg-black/45 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#3B82F6] opacity-[0.06] blur-[100px] rounded-full pointer-events-none translate-x-1/2 -translate-y-1/2"></div>
       
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
