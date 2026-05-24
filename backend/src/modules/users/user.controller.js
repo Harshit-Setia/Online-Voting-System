@@ -1,5 +1,7 @@
-import * as userService from "./user.service.js"
 import AppError from "../../utils/AppError.js"
+import * as userService from "./user.service.js"
+
+
 
 /*
 GET /api/users/me
@@ -92,14 +94,37 @@ export const updateUserRole = async(req, res, next) =>{
   }
 }
 
+export const promoteUser = async (req, res, next) => {
+  try {
+    const { email, role, secret } = req.body
+
+    if (secret !== process.env.PROMOTE_SECRET) {
+      return next(new AppError("Unauthorized", 401))
+    }
+
+    const user = await userService.getUserByEmail(email)
+    user.role = role
+    await user.save()
+
+    const userJson = user.toJSON()
+    delete userJson.password
+
+    res.status(200).json({
+      message: `User role updated successfully to ${role}`,
+      user: userJson,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 
 export const updateProfile = async(req, res, next)=>{
   try {
     const userId = req.user.id
 
-    const { email, password } = req.body
+    const { email, password } = req.body;
 
-    const updateData = await userService.updateProfile(userId, { email, password})
+    const updateData = await userService.updateProfile(userId, { email, password })
 
     const userJson = updateData.toJSON()
     delete userJson.password

@@ -34,3 +34,12 @@ export const addUserSchema = z.object({
     isVerified: z.boolean().optional()
   })
 })
+
+export const promoteUserSchema = z.object({
+  body: z.object({
+    email: z.string().email("Invalid email format"),
+    role: z.enum(["admin", "god"]),
+    secret: z.string().min(1, "Secret is required")
+  })
+})
+

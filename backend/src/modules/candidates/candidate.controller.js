@@ -36,3 +36,13 @@ export const deleteCandidate=async (req, res, next) => {
         next(error)
     }
 }
+
+// Update candidate details
+export const updateCandidate = async (req, res, next) => {
+    try {
+        const updated = await candidateService.updateCandidate(req.params.id, req.body)
+        res.json({message: "Candidate updated", candidate: updated})
+    } catch (error) {
+        next(error)
+    }
+}

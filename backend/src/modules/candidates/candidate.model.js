@@ -26,7 +26,11 @@ const Candidate = sequelize.define(
     election_id: {
       type: DataTypes.INTEGER,
       allowNull: false
-    }
+    },
+    is_active: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true
+    },
   },
   {
     tableName: "candidates",

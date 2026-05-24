@@ -61,7 +61,8 @@ export const verifyEmail = async (token) => {
 
 // login user
 export const loginUser = async({email,password})=>{
-    const user=await User.findOne({where:{email}})
+    console.log('Attempting login for', email);
+    const user = await User.findOne({ where: { email } });
     if(!user){
         throw new AppError("Invalid Email or Password", 401)
     }

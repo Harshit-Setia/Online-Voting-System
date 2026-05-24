@@ -49,3 +49,13 @@ export const endElection=async (req, res, next) => {
         next(error)
     }
 }
+
+export const deleteElection = async (req, res, next) => {
+  try {
+    const election = await electionService.getElectionById(req.params.id);
+    await election.destroy();
+    res.json({ message: 'Election deleted' });
+  } catch (error) {
+    next(error);
+  }
+};

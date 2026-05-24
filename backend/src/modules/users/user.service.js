@@ -1,6 +1,6 @@
-import User from "./user.model.js"
 import AppError from "../../utils/AppError.js"
 import { hashPassword } from "../../utils/hash.js"
+import User from "./user.model.js"
 
 export const getProfile=async(userId)=>{
     const user=await User.findByPk(userId,{
@@ -60,16 +60,22 @@ export const updateUserRole = async(id, role)=>{
     return user
 }
 
+export const getUserByEmail = async(email) => {
+    const user = await User.findOne({ where: { email } })
+
+    if(!user) throw new AppError("User not found", 404)
+
+    return user
+}
 
 export const updateProfile = async(id, updateData) =>{
     const user = await User.findByPk(id)
 
     if(!user) throw new AppError("User not found", 404)
 
-    if(updateData.email) user.email = updateData.email
-    if(updateData.password) user.password = await hashPassword(updateData.password)
-
-    await user.save()
+    if (updateData.email) user.email = updateData.email;
+    if (updateData.password) user.password = await hashPassword(updateData.password);
+    await user.save();
     return user
 }
 

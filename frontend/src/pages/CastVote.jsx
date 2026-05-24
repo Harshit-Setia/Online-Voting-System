@@ -5,8 +5,10 @@ import {
   ArrowLeft,
   CheckCircle2,
   ShieldCheck,
-  Mail,
-  Vote
+  Phone,
+  Vote,
+  Search,
+  X
 } from 'lucide-react';
 
 import {
@@ -35,6 +37,37 @@ const CastVote = () => {
   const [actionLoading, setActionLoading] = useState(false);
 
   const [voteSuccess, setVoteSuccess] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const getPartyStyles = (partyName = '') => {
+    const p = partyName.toUpperCase();
+    if (p.includes('BJP') || p.includes('NDA')) {
+      return {
+        badge: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
+        glow: 'bg-amber-500/5',
+        theme: 'amber'
+      };
+    }
+    if (p.includes('INC') || p.includes('CONG')) {
+      return {
+        badge: 'bg-sky-500/10 text-sky-400 border border-sky-500/20',
+        glow: 'bg-sky-500/5',
+        theme: 'sky'
+      };
+    }
+    if (p.includes('AAP')) {
+      return {
+        badge: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+        glow: 'bg-emerald-500/5',
+        theme: 'emerald'
+      };
+    }
+    return {
+      badge: 'bg-violet-500/10 text-violet-400 border border-violet-500/20',
+      glow: 'bg-violet-500/5',
+      theme: 'violet'
+    };
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -48,10 +81,7 @@ const CastVote = () => {
       const candData = await candRes.json();
 
       if (!elecRes.ok) {
-        throw new Error(
-          elecData.message ||
-          'Failed to fetch election details'
-        );
+        throw new Error(elecData.message || 'Failed to fetch election details');
       }
 
       if (!candRes.ok) {
@@ -85,6 +115,13 @@ const CastVote = () => {
 
     try {
       const token = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      const user = storedUser ? JSON.parse(storedUser) : null;
+      if (!user) {
+        setError('Session expired. Please log in.');
+        setTimeout(() => navigate('/login'), 1500);
+        return;
+      }
 
       const res = await fetch(
         `${API_URL}/votes/request-otp`,
@@ -152,8 +189,9 @@ const CastVote = () => {
 
       setVoteSuccess(true);
 
+      // After successful vote, navigate to results page for this election
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate(`/results/${electionId}`);
       }, 3000);
 
     } catch (err) {
@@ -213,7 +251,7 @@ const CastVote = () => {
               className="animate-spin"
             />
 
-            Redirecting to dashboard...
+            Redirecting to results...
           </div>
         </div>
       </div>
@@ -277,107 +315,162 @@ const CastVote = () => {
 
         {step === 1 ? (
           <>
-            {/* CANDIDATES */}
-            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-
-              {candidates.map((candidate) => {
-
-                const isSelected =
-                  selectedCandidate?.id === candidate.id;
-
-                return (
-                  <div
-                    key={candidate.id}
-                    onClick={() =>
-                      setSelectedCandidate(candidate)
-                    }
-                    className={`group relative p-7 rounded-[30px] border cursor-pointer transition-all duration-300 backdrop-blur-xl ${
-                      isSelected
-                        ? 'bg-white/[0.06] border-white/20 scale-[1.02]'
-                        : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.05] hover:border-white/20'
-                    }`}
-                  >
-
-                    {/* SELECTED ICON */}
-                    {isSelected && (
-                      <div className="absolute top-5 right-5">
-
-                        <CheckCircle2
-                          size={24}
-                          className="text-white"
-                        />
-                      </div>
-                    )}
-
-                    {/* AVATAR */}
-                    <div className="mb-6">
-
-                      {candidate.photo_url ? (
-                        <img
-                          src={candidate.photo_url}
-                          alt={candidate.name}
-                          className="w-24 h-24 rounded-3xl object-cover border border-white/10"
-                        />
-                      ) : (
-                        <div className="w-24 h-24 rounded-3xl bg-white/[0.06] border border-white/10 flex items-center justify-center text-3xl font-bold">
-
-                          {candidate.name.charAt(0)}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* INFO */}
-                    <div>
-
-                      <h2 className="text-2xl font-bold">
-                        {candidate.name}
-                      </h2>
-
-                      <p className="text-zinc-500 mt-2">
-                        {candidate.party}
-                      </p>
-                    </div>
-
-                    {/* FOOTER */}
-                    <div className="mt-8 pt-6 border-t border-white/10 flex items-center justify-between">
-
-                      <span className="text-sm text-zinc-500">
-                        Verified Candidate
-                      </span>
-
-                      <Vote
-                        size={18}
-                        className="text-zinc-500"
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+            {/* SEARCH & FILTER BAR */}
+            <div className="relative max-w-xl mx-auto mb-12">
+              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-zinc-500">
+                <Search size={20} />
+              </div>
+              <input
+                type="text"
+                placeholder="Search candidates by name or party..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-14 pl-14 pr-12 rounded-2xl bg-white/[0.03] border border-white/10 text-white placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.05] transition-all backdrop-blur-md"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-5 flex items-center text-zinc-500 hover:text-white transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              )}
             </div>
 
-            {/* BUTTON */}
-            <div className="flex justify-center mt-14">
+            {/* FILTERED CANDIDATES */}
+            {(() => {
+              const filtered = candidates.filter((c) => {
+                if (!c.is_active) return false;
+                const query = searchQuery.toLowerCase();
+                return (
+                  c.name.toLowerCase().includes(query) ||
+                  c.party.toLowerCase().includes(query)
+                );
+              });
 
+              if (filtered.length === 0) {
+                return (
+                  <div className="text-center py-20 rounded-[32px] border border-white/5 bg-white/[0.01] backdrop-blur-md max-w-xl mx-auto">
+                    <Vote size={48} className="mx-auto text-zinc-600 mb-6 animate-pulse" />
+                    <h3 className="text-2xl font-bold text-white">No Candidates Found</h3>
+                    <p className="text-zinc-500 mt-2">We couldn't find any candidate matching "{searchQuery}"</p>
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="mt-6 h-11 px-6 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-sm font-semibold border border-white/10 transition-colors text-white"
+                    >
+                      Clear Search
+                    </button>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+                  {filtered.map((candidate) => {
+                    const isSelected = selectedCandidate?.id === candidate.id;
+                    const style = getPartyStyles(candidate.party);
+
+                    return (
+                      <div
+                        key={candidate.id}
+                        onClick={() => setSelectedCandidate(candidate)}
+                        className={`group relative p-8 rounded-[32px] border cursor-pointer transition-all duration-500 backdrop-blur-2xl overflow-hidden flex flex-col ${
+                          isSelected
+                            ? 'bg-white/[0.05] border-emerald-500/40 scale-[1.03] shadow-[0_0_50px_rgba(16,185,129,0.12)]'
+                            : 'bg-white/[0.02] border-white/5 hover:border-white/20 hover:-translate-y-2 shadow-2xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]'
+                        }`}
+                      >
+                        {/* GLOWING AMBIENT HALO */}
+                        <div
+                          className={`absolute -top-24 -left-24 w-48 h-48 rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none ${style.glow}`}
+                        ></div>
+
+                        {/* SELECTED DECORATOR */}
+                        {isSelected && (
+                          <div className="absolute top-6 right-6 w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 border border-emerald-400/20 animate-scale-in">
+                            <CheckCircle2 size={18} className="text-black stroke-[3px]" />
+                          </div>
+                        )}
+
+                        {/* AVATAR CONTAINER */}
+                        <div className="relative mb-8 self-start">
+                          <div
+                            className={`absolute inset-0 rounded-3xl blur-[12px] opacity-0 group-hover:opacity-40 transition-opacity duration-500 ${
+                              isSelected ? 'opacity-30 bg-emerald-500' : 'bg-white'
+                            }`}
+                          ></div>
+                          {candidate.photo_url ? (
+                            <img
+                              src={candidate.photo_url}
+                              alt={candidate.name}
+                              className={`w-28 h-28 rounded-3xl object-cover relative z-10 border transition-all duration-500 ${
+                                isSelected ? 'border-emerald-400' : 'border-white/10 group-hover:border-white/20'
+                              }`}
+                            />
+                          ) : (
+                            <div
+                              className={`w-28 h-28 rounded-3xl border flex items-center justify-center text-4xl font-extrabold relative z-10 transition-all duration-500 ${
+                                isSelected
+                                  ? 'bg-emerald-500/10 border-emerald-400 text-emerald-400'
+                                  : 'bg-white/[0.04] border-white/10 text-white group-hover:bg-white/[0.08]'
+                              }`}
+                            >
+                              {candidate.name.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* INFO */}
+                        <div className="flex-grow">
+                          <span className={`inline-flex px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 ${style.badge}`}>
+                            {candidate.party}
+                          </span>
+                          <h2 className="text-2xl font-bold tracking-tight text-white group-hover:text-emerald-300 transition-colors">
+                            {candidate.name}
+                          </h2>
+                          <p className="text-zinc-500 mt-3 text-sm leading-relaxed">
+                            {candidate.description || `Registered candidate representing the ${candidate.party} for this secure, democratic poll.`}
+                          </p>
+                        </div>
+
+                        {/* FOOTER */}
+                        <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+                          <span className="text-xs text-zinc-500 font-medium tracking-wide uppercase">
+                            Verified Candidate
+                          </span>
+                          <Vote
+                            size={18}
+                            className={`transition-colors duration-300 ${
+                              isSelected ? 'text-emerald-400' : 'text-zinc-600 group-hover:text-zinc-400'
+                            }`}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
+            {/* BUTTON */}
+            <div className="flex justify-center mt-16">
               <button
                 onClick={handleRequestOTP}
-                disabled={
-                  !selectedCandidate || actionLoading
-                }
-                className="group h-16 px-10 rounded-2xl bg-white text-black font-semibold text-lg hover:bg-zinc-200 transition-all flex items-center gap-3 disabled:opacity-50"
+                disabled={!selectedCandidate || actionLoading}
+                className={`group h-16 px-12 rounded-2xl font-bold text-lg transition-all duration-500 flex items-center gap-3 disabled:opacity-30 disabled:pointer-events-none hover:-translate-y-0.5 ${
+                  selectedCandidate
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-black shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/35 hover:brightness-110'
+                    : 'bg-white/[0.04] text-zinc-500 border border-white/10'
+                }`}
               >
-
                 {actionLoading ? (
-                  <Loader2
-                    size={20}
-                    className="animate-spin"
-                  />
+                  <Loader2 size={22} className="animate-spin text-black" />
                 ) : (
                   <>
-                    Continue Securely
-
+                    Confirm Selection
                     <ArrowLeft
                       size={18}
-                      className="rotate-180 group-hover:translate-x-1 transition-transform"
+                      className="rotate-180 group-hover:translate-x-1 transition-transform stroke-[2.5px]"
                     />
                   </>
                 )}
@@ -393,7 +486,7 @@ const CastVote = () => {
               {/* ICON */}
               <div className="w-24 h-24 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-8">
 
-                <Mail
+                <Phone
                   size={40}
                   className="text-emerald-400"
                 />

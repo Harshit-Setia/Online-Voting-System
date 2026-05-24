@@ -2,6 +2,7 @@ import React, {
   useEffect,
   useState
 } from 'react';
+import { getResults, getWinner } from '../services/resultService';
 
 import {
   useNavigate,
@@ -64,7 +65,7 @@ const Results = () => {
             ),
 
             fetch(
-              `${API_URL}/results/winner/${electionId}`,
+              `${API_URL}/results/${electionId}/winner`,
               {
                 headers: {
                   Authorization:
@@ -95,63 +96,29 @@ const Results = () => {
         }
 
         // TOTAL VOTES
-        const total =
-          resultsData.reduce(
-            (sum, item) =>
-              sum +
-              Number(
-                item.dataValues.votes
-              ),
-            0
-          );
-
-        // FORMAT RESULTS
-        const formatted =
-          resultsData.map((item) => ({
-
-            id: item.candidate_id,
-
-            name:
-              item.Candidate.name,
-
-            party:
-              item.Candidate.party,
-
-            votes: Number(
-              item.dataValues.votes
-            ),
-
-            percentage: Math.round(
-              (Number(
-                item.dataValues.votes
-              ) /
-                total) *
-                100
-            ),
-
-            photo:
-              item.Candidate
-                .photo_url
-          }));
-
-        setResults(formatted);
-
+        const total = resultsData.reduce((sum, item) => sum + Number(item.votes), 0);
+        // Transform results to include candidate details and vote percentages
+        const transformed = resultsData.map(item => ({
+          id: item.candidate_id,
+          name: item.Candidate?.name || '',
+          party: item.Candidate?.party || '',
+          photo: item.Candidate?.photo_url || '',
+          votes: Number(item.votes),
+          percentage: total ? ((Number(item.votes) / total) * 100).toFixed(1) : 0
+        }));
+        setResults(transformed);
         setWinner(winnerData);
-
         setTotalVotes(total);
-
+        setLoading(false);
       } catch (err) {
-
         setError(err.message);
-
-      } finally {
-
         setLoading(false);
       }
     };
 
     fetchResults();
-
+    const interval = setInterval(fetchResults, 30000);
+    return () => clearInterval(interval);
   }, [electionId]);
 
   return (

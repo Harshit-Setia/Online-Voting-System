@@ -14,8 +14,13 @@ const User=sequelize.define(
             allowNull:false
         },
         email:{
-            type:DataTypes.STRING,
+            type: DataTypes.STRING,
             allowNull:false,
+            unique:true
+        },
+        mobile:{
+            type: DataTypes.STRING,
+            allowNull:true,
             unique:true
         },
         password:{
@@ -31,6 +36,10 @@ const User=sequelize.define(
             defaultValue:false
         },
         isSuspended:{
+            type: DataTypes.BOOLEAN,
+            defaultValue:false,
+        },
+        isMobileVerified:{
             type: DataTypes.BOOLEAN,
             defaultValue:false,
         },

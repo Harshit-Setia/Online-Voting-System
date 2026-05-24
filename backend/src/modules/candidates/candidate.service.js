@@ -39,4 +39,12 @@ export const deleteCandidate=async(id)=>{
     await candidate.destroy()
 
     return true
-}
+} 
+
+// update a candidate's details
+export const updateCandidate = async (id, payload) => {
+  const candidate = await Candidate.findByPk(id);
+  if (!candidate) throw new AppError('Candidate not found', 404);
+  await candidate.update(payload);
+  return candidate;
+};

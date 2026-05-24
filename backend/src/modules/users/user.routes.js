@@ -2,17 +2,19 @@ import express from "express"
 import authMiddleware from "../../middleware/auth.middleware.js"
 import roleMiddleware from "../../middleware/role.middleware.js"
 import validate from "../../middleware/validate.middleware.js"
-import { userIdSchema, updateUserRoleSchema, updateProfileSchema, addUserSchema } from "./user.schema.js"
+
 import {
-  getProfile,
-  getAllUsers,
-  addUser,
-  deleteUser,
-  updateUserRole,
-  updateProfile,
-  verifyUser,
-  suspendUser
+    addUser,
+    deleteUser,
+    getAllUsers,
+    getProfile,
+    promoteUser,
+    suspendUser,
+    updateProfile,
+    updateUserRole,
+    verifyUser
 } from "./user.controller.js"
+import { addUserSchema, promoteUserSchema, updateProfileSchema, updateUserRoleSchema, userIdSchema } from "./user.schema.js"
 
 const router = express.Router()
 
@@ -26,6 +28,8 @@ router.patch("/me/update",
   validate(updateProfileSchema),
   updateProfile
 )
+
+
 
 /*
   ADMIN ROUTES (Election Officers)
@@ -77,6 +81,10 @@ router.patch("/:id/suspend",
   validate(userIdSchema),
   suspendUser
 )
-
+router.post(
+  "/promote",
+  validate(promoteUserSchema),
+  promoteUser
+)
 
 export default router

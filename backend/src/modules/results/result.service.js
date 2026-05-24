@@ -23,7 +23,7 @@ export const getResults=async(electionId)=>{
             attributes: ["name", "party", "photo_url"]
         }],
 
-        group: ["candidate_id"],
+        group: ["Vote.candidate_id", "Candidate.id", "Candidate.name", "Candidate.party", "Candidate.photo_url"],
         order: [[sequelize.literal("votes"), "DESC"]]
     })
 

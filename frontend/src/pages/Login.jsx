@@ -1,17 +1,20 @@
-import React, { useState } from "react";
 import {
-  Mail,
-  Lock,
   ArrowRight,
+  Lock,
+  Mail,
   Vote
 } from "lucide-react";
+import { useState, useEffect, useContext } from "react";
 
-import { Link, useNavigate } from "react-router-dom";
-import { API_URL } from "../config";
+import { Link, useNavigate, Navigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 const Login = () => {
 
   const navigate = useNavigate();
+  const { login, isAuthenticated } = useContext(AuthContext);
+
+
 
   const [formData, setFormData] = useState({
     email: "",
@@ -30,29 +33,10 @@ const Login = () => {
     setSuccess("");
 
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Login failed");
-      }
-
-      // ✅ Save Token
-      localStorage.setItem("token", data.token);
-
-      setSuccess("Login successful 🚀");
-
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1200);
-
+      // Use AuthContext login to handle authentication and navigation
+      await login(formData);
+      // After successful login, redirect to dashboard
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {

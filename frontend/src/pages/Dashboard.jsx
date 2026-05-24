@@ -1,23 +1,21 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
 import {
-  User,
-  Shield,
+  CalendarClock,
+  Clock,
   Crown,
-  Settings,
+  Loader2,
   LogOut,
   PlusCircle,
+  Settings,
+  Shield,
   Users,
-  CalendarClock,
-  Loader2,
-  CheckCircle2,
-  Clock,
+  User,
+  Vote,
   XCircle,
-  Pencil,
-  Save,
-  Vote
+  Trophy
 } from 'lucide-react';
 
 import { API_URL } from '../config';
@@ -62,6 +60,14 @@ const Dashboard = () => {
   const [loadingElections, setLoadingElections] =
     useState(false);
 
+  const [adminMessage, setAdminMessage] = useState(null);
+  useEffect(() => {
+    if (adminMessage) {
+      const timer = setTimeout(() => setAdminMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [adminMessage]);
+
   const [editOpen, setEditOpen] = useState(false);
 
   const [editForm, setEditForm] = useState({
@@ -70,47 +76,51 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    const storedUser =
-      localStorage.getItem('user');
+    const token = localStorage.getItem('token');
 
-    if (!storedUser) {
+    if (!token) {
       navigate('/login');
       return;
     }
 
-    setUser(JSON.parse(storedUser));
+    const storedUser = localStorage.getItem('user');
+
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        localStorage.removeItem('user');
+      }
+    }
   }, [navigate]);
 
   const fetchProfile = useCallback(async () => {
-
     const token = localStorage.getItem('token');
 
     if (!token) return;
 
     try {
-
-      const res = await fetch(
-        `${API_URL}/users/me`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+      const res = await fetch(`${API_URL}/users/me`, {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      );
+      });
 
-      if (res.ok) {
+      if (!res.ok) return;
 
-        const data = await res.json();
+      const data = await res.json();
 
-        setProfile(data);
+      setProfile(data);
+      setUser(data);
+      localStorage.setItem('user', JSON.stringify(data));
 
-        setEditForm({
-          email: data.email || '',
-          password: ''
-        });
-      }
-
-    } catch {}
+      setEditForm({
+        email: data.email || '',
+        password: ''
+      });
+    } catch (error) {
+      console.error('Failed to refresh profile:', error); 
+    }
   }, []);
 
   useEffect(() => {
@@ -141,16 +151,119 @@ const Dashboard = () => {
     }
   }, []);
 
+  // Admin action handlers
+  const handleStartElection = async (id) => {
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_URL}/elections/start/${id}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        setAdminMessage(error.message || 'Failed to start election');
+        return;
+      }
+      await fetchElections();
+    } catch (e) {
+      setAdminMessage('Server error');
+    }
+  };
+
+  const handleEndElection = async (id) => {
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_URL}/elections/end/${id}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        setAdminMessage(error.message || 'Failed to end election');
+        return;
+      }
+      await fetchElections();
+    } catch (e) {
+      setAdminMessage('Server error');
+    }
+  };
+
+  const handleDeleteElection = async (id) => {
+    const token = localStorage.getItem('token');
+    if (!window.confirm('Are you sure you want to delete this election?')) return;
+    try {
+      const res = await fetch(`${API_URL}/elections/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        setAdminMessage(error.message || 'Failed to delete election');
+        return;
+      }
+      await fetchElections();
+    } catch (e) {
+      setAdminMessage('Server error');
+    }
+  };
+
+  const handleEditElection = async (election) => {
+    const token = localStorage.getItem('token');
+    const newTitle = window.prompt('New title', election.title);
+    const newDesc = window.prompt('New description', election.description);
+    if (newTitle === null && newDesc === null) return;
+    const payload = {};
+    if (newTitle !== null) payload.title = newTitle;
+    if (newDesc !== null) payload.description = newDesc;
+    try {
+      const res = await fetch(`${API_URL}/elections/${election.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        setAdminMessage(error.message || 'Failed to update election');
+        return;
+      }
+      await fetchElections();
+    } catch (e) {
+      setAdminMessage('Server error');
+    }
+  };
+
   useEffect(() => {
     fetchElections();
   }, [fetchElections]);
 
+  const handleSaveProfile = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`${API_URL}/users/me/update`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editForm),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to update profile');
+      setUser(data.user);
+      setProfile(data.user);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setEditOpen(false);
+    } catch (err) {
+      // setError(err.message);
+    }
+  };
+
   const handleLogout = () => {
-
     localStorage.removeItem('token');
-
     localStorage.removeItem('user');
-
     navigate('/login');
   };
 
@@ -312,6 +425,11 @@ const Dashboard = () => {
         </div>
 
         {/* PROFILE + ADMIN */}
+{adminMessage && (
+  <div className="mt-4 p-2 bg-amber-500/10 border border-amber-500 text-amber-300 rounded">
+    {adminMessage}
+  </div>
+)}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* PROFILE */}
@@ -351,8 +469,7 @@ const Dashboard = () => {
                   </h3>
                 </div>
 
-                <div>
-
+                <div className="">
                   <p className="text-xs uppercase text-zinc-500">
                     Role
                   </p>
@@ -361,6 +478,8 @@ const Dashboard = () => {
                     {profile?.role || user.role}
                   </h3>
                 </div>
+
+
 
                 <button
                   onClick={() =>
@@ -374,6 +493,7 @@ const Dashboard = () => {
             ) : (
               <div className="space-y-4">
 
+                {/* Email input */}
                 <input
                   type="email"
                   placeholder="New Email"
@@ -387,29 +507,19 @@ const Dashboard = () => {
                   className="w-full h-14 rounded-2xl bg-[#111111] border border-white/10 px-5 outline-none"
                 />
 
-                <input
-                  type="password"
-                  placeholder="New Password"
-                  value={editForm.password}
-                  onChange={(e) =>
-                    setEditForm({
-                      ...editForm,
-                      password: e.target.value
-                    })
-                  }
-                  className="w-full h-14 rounded-2xl bg-[#111111] border border-white/10 px-5 outline-none"
-                />
 
+
+                {/* BUTTONS */}
                 <div className="flex gap-3">
 
-                  <button className="flex-1 h-14 rounded-2xl bg-white text-black font-semibold hover:bg-zinc-200 transition-all">
+                  <button onClick={handleSaveProfile} className="flex-1 h-14 rounded-2xl bg-white text-black font-semibold hover:bg-zinc-200 transition-all">
                     Save
                   </button>
 
                   <button
-                    onClick={() =>
+                    onClick={() => {
                       setEditOpen(false)
-                    }
+                    }}
                     className="flex-1 h-14 rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-all"
                   >
                     Cancel
@@ -476,6 +586,27 @@ const Dashboard = () => {
 
                   <p className="text-zinc-500 mt-3 text-sm">
                     Control user access and permissions.
+                  </p>
+                </button>
+
+                <button
+                  onClick={() =>
+                    navigate('/admin/manage-candidates')
+                  }
+                  className="group p-8 rounded-3xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-all text-left"
+                >
+
+                  <User
+                    size={36}
+                    className="mb-6 text-white group-hover:scale-110 transition-transform"
+                  />
+
+                  <h3 className="text-xl font-semibold">
+                    Manage Candidates
+                  </h3>
+
+                  <p className="text-zinc-500 mt-3 text-sm">
+                    Add, edit or toggle candidates.
                   </p>
                 </button>
 
@@ -625,18 +756,41 @@ const Dashboard = () => {
                               `/vote/${election.id}`
                             )
                           }
-                          className="h-12 px-5 rounded-2xl bg-white text-black font-semibold hover:bg-zinc-200 transition-all"
+                          className="h-12 px-5 rounded-2xl bg-white text-black font-semibold hover:bg-zinc-200 transition-all flex items-center justify-center gap-3"
                         >
                           Cast Vote
+                        </button>
+
+                      ) : election.status === 'ended' ? (
+
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/results/${election.id}`
+                            )
+                          }
+                          className="h-12 px-5 rounded-2xl bg-amber-500/20 text-amber-400 font-semibold hover:bg-amber-500/30 transition-all flex items-center justify-center gap-2"
+                        >
+                          <Trophy size={16} /> View Results
                         </button>
 
                       ) : (
 
                         <span className="text-sm text-zinc-600">
-                          Election Closed
+                          Not Started
                         </span>
                       )}
                     </div>
+
+                    {/* Admin controls */}
+                    {isAdmin && (
+                      <div className="mt-4 flex gap-2 justify-end">
+                        <button onClick={() => handleEditElection(election)} className="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm">Edit</button>
+                        <button onClick={() => handleStartElection(election.id)} className="px-3 py-1 rounded bg-green-600 hover:bg-green-700 text-white text-sm">Start</button>
+                        <button onClick={() => handleEndElection(election.id)} className="px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-white text-sm">End</button>
+                        <button onClick={() => handleDeleteElection(election.id)} className="px-3 py-1 rounded bg-gray-600 hover:bg-gray-700 text-white text-sm">Delete</button>
+                      </div>
+                    )}
                   </div>
                 );
               })}

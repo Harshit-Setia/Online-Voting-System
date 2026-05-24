@@ -7,7 +7,8 @@ import { addCandidateSchema, candidateIdSchema, getCandidatesSchema } from "./ca
 import {
     addCandidate,
     deleteCandidate,
-    getCandidates
+    getCandidates,
+    updateCandidate
 } from "./candidate.controller.js"
 
 
@@ -19,5 +20,7 @@ router.delete("/:id", authMiddleware, roleMiddleware(["admin", "god"]), validate
 
 // public
 router.get("/:electionId", validate(getCandidatesSchema), getCandidates)
+
+router.put('/:id', authMiddleware, roleMiddleware(["admin", "god"]), validate(candidateIdSchema), updateCandidate)
 
 export default router

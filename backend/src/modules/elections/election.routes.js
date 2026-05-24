@@ -3,7 +3,7 @@ import authMiddleware from "../../middleware/auth.middleware.js"
 import roleMiddleware from "../../middleware/role.middleware.js"
 import validate from "../../middleware/validate.middleware.js"
 import { createElectionSchema, electionIdSchema } from "./election.schema.js"
-import { createElection, endElection, getAllElections, getElectionById, startElection } from "./election.controller.js"
+import { createElection, endElection, getAllElections, getElectionById, startElection, deleteElection } from "./election.controller.js"
 
 const router = Router()
 
@@ -14,6 +14,7 @@ router.put("/end/:id", authMiddleware, roleMiddleware(["admin", "god"]), validat
 
 // public
 router.get("/", getAllElections)
-router.get("/:id", validate(electionIdSchema), getElectionById)
+router.get("/:id", validate(electionIdSchema), getElectionById);
+router.delete("/:id", authMiddleware, roleMiddleware(["admin", "god"]), validate(electionIdSchema), deleteElection)
 
 export default router

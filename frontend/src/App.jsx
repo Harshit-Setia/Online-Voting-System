@@ -27,8 +27,12 @@ import ManageCandidates from './pages/ManageCandidates';
 import CastVote from './pages/CastVote';
 import ManageUsers from './pages/ManageUsers';
 import Results from './pages/Results';
+import AdminElections from './pages/AdminElections';
 
 import { Button } from '@headlessui/react';
+import { AuthProvider } from './context/AuthContext';
+import PrivateRoute from './components/PrivateRoute';
+import { Toaster } from 'react-hot-toast';
 
 const LandingPage = () => {
 
@@ -205,6 +209,20 @@ const LandingPage = () => {
               >
                 Analytics
               </a>
+              {/* ADMIN LINK */}
+              <a
+                href="/admin/manage-candidates"
+                className="hover:text-white transition-colors"
+              >
+                Manage Candidates
+              </a>
+              <a
+                href="/admin/elections"
+                className="hover:text-white transition-colors ml-4"
+              >
+                Manage Elections
+              </a>
+              {/* END ADMIN LINK */}
             </div>
 
             {/* BUTTONS */}
@@ -389,63 +407,27 @@ const LandingPage = () => {
 function App() {
 
   return (
-    <BrowserRouter>
-
-      <Routes>
-
-        <Route
-          path="/"
-          element={<LandingPage />}
-        />
-
-        <Route
-          path="/login"
-          element={<Login />}
-        />
-
-        <Route
-          path="/register"
-          element={<Register />}
-        />
-
-        <Route
-          path="/verify-email"
-          element={<VerifyEmail />}
-        />
-
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
-
-        <Route
-          path="/admin/add-election"
-          element={<AddElection />}
-        />
-
-        <Route
-          path="/admin/manage-candidates/:electionId"
-          element={<ManageCandidates />}
-        />
-
-        <Route
-          path="/admin/manage-users"
-          element={<ManageUsers />}
-        />
-
-        <Route
-          path="/vote/:electionId"
-          element={<CastVote />}
-        />
-
-        <Route
-          path="/results/:electionId"
-          element={<Results />}
-        />
-
-      </Routes>
-
-    </BrowserRouter>
+      <BrowserRouter>
+        <AuthProvider>
+          <Toaster position="top-right" />
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            {/* Protected routes */}
+            <Route element={<PrivateRoute />}> 
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/admin/add-election" element={<AddElection />} />
+              <Route path="/admin/elections" element={<AdminElections />} />
+              <Route path="/admin/manage-candidates/:electionId?" element={<ManageCandidates />} />
+              <Route path="/admin/manage-users" element={<ManageUsers />} />
+              <Route path="/vote/:electionId" element={<CastVote />} />
+              <Route path="/results/:electionId" element={<Results />} />
+            </Route>
+          </Routes>
+        </AuthProvider>
+      </BrowserRouter>
   );
 }
 

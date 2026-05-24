@@ -22,12 +22,70 @@ import {
 } from 'lucide-react';
 
 import { API_URL } from '../config';
+import { updateCandidateStatus } from '../services/candidateService';
 
 const ManageCandidates = () => {
 
   const { electionId } = useParams();
-
+  // If no electionId is provided, we will let the admin choose one
   const navigate = useNavigate();
+  if (!electionId) {
+    // Show a dropdown of elections to select
+    const [electionsList, setElectionsList] = useState([]);
+    const [loadingElections, setLoadingElections] = useState(true);
+    const [errorElections, setErrorElections] = useState('');
+
+    useEffect(() => {
+      const fetchElections = async () => {
+        try {
+          const res = await fetch(`${API_URL}/elections`);
+          const data = await res.json();
+          if (res.ok) setElectionsList(data);
+          else setErrorElections(data.message || 'Failed to load elections');
+        } catch (e) {
+          setErrorElections('Network error');
+        } finally {
+          setLoadingElections(false);
+        }
+      };
+      fetchElections();
+    }, []);
+
+    if (loadingElections) {
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <p className="text-zinc-400">Loading elections…</p>
+        </div>
+      );
+    }
+    if (errorElections) {
+      return (
+        <div className="flex items-center justify-center h-screen">
+          <p className="text-red-400">{errorElections}</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0B0B0B] text-white">
+        <h2 className="text-2xl mb-4">Select Election to Manage Candidates</h2>
+        <select
+          className="p-2 rounded bg-white/[0.03] border border-white/10 text-black"
+          onChange={(e) => {
+            const id = e.target.value;
+            if (id) navigate(`/admin/manage-candidates/${id}`);
+          }}
+        >
+          <option value="">-- Choose Election --</option>
+          {electionsList.map((e) => (
+            <option key={e.id} value={e.id}>{e.title} ({e.status})</option>
+          ))}
+        </select>
+      </div>
+    );
+  }
+
+ 
 
   const [candidates, setCandidates] = useState([]);
 
@@ -202,6 +260,19 @@ const ManageCandidates = () => {
       setActionLoading(false);
     }
   };
+
+  const handleToggleActive = async (candidateId, currentStatus) => {
+    setActionLoading(true);
+    try {
+      await updateCandidateStatus(candidateId, !currentStatus);
+      await fetchCandidates();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-[#0B0B0B] text-white relative overflow-hidden">
@@ -537,9 +608,13 @@ const ManageCandidates = () => {
                           {candidate.id}
                         </span>
 
-                        <span className="text-emerald-400 text-sm font-medium">
-                          Active
-                        </span>
+                        <button
+                          onClick={() => handleToggleActive(candidate.id, candidate.is_active)}
+                          disabled={actionLoading}
+                          className="text-sm font-medium text-emerald-400 border border-emerald-400 rounded px-2 py-1 hover:bg-emerald-400/10"
+                        >
+                          {candidate.is_active ? 'Active' : 'Inactive'}
+                        </button>
                       </div>
                     </div>
                   </div>
