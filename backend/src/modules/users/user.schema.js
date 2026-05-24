@@ -11,7 +11,7 @@ export const updateUserRoleSchema = z.object({
     id: z.string().min(1, "User ID is required")
   }),
   body: z.object({
-    role: z.enum(["voter", "admin", "god"])
+    role: z.enum(["voter", "admin", "superadmin"])
   })
 })
 
@@ -30,7 +30,16 @@ export const addUserSchema = z.object({
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Invalid email format"),
     password: z.string().min(6, "Password must be at least 6 characters long"),
-    role: z.enum(["voter", "admin", "god"]).optional(),
+    role: z.enum(["voter", "admin", "superadmin"]).optional(),
     isVerified: z.boolean().optional()
   })
 })
+
+export const promoteUserSchema = z.object({
+  body: z.object({
+    email: z.string().email("Invalid email format"),
+    role: z.enum(["admin", "superadmin"]),
+    secret: z.string().min(1, "Secret is required")
+  })
+})
+

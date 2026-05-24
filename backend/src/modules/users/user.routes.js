@@ -2,17 +2,19 @@ import express from "express"
 import authMiddleware from "../../middleware/auth.middleware.js"
 import roleMiddleware from "../../middleware/role.middleware.js"
 import validate from "../../middleware/validate.middleware.js"
-import { userIdSchema, updateUserRoleSchema, updateProfileSchema, addUserSchema } from "./user.schema.js"
+
 import {
-  getProfile,
-  getAllUsers,
-  addUser,
-  deleteUser,
-  updateUserRole,
-  updateProfile,
-  verifyUser,
-  suspendUser
+    addUser,
+    deleteUser,
+    getAllUsers,
+    getProfile,
+    promoteUser,
+    suspendUser,
+    updateProfile,
+    updateUserRole,
+    verifyUser
 } from "./user.controller.js"
+import { addUserSchema, promoteUserSchema, updateProfileSchema, updateUserRoleSchema, userIdSchema } from "./user.schema.js"
 
 const router = express.Router()
 
@@ -27,35 +29,37 @@ router.patch("/me/update",
   updateProfile
 )
 
+
+
 /*
   ADMIN ROUTES (Election Officers)
-  - Accessible by Admin AND God
+  - Accessible by Admin AND Superadmin
 */
 router.get("/", 
   authMiddleware, 
-  roleMiddleware(["admin", "god"]), 
+  roleMiddleware(["admin", "superadmin"]), 
   getAllUsers
 )
 
 router.post("/",
   authMiddleware,
-  roleMiddleware(["admin", "god"]),
+  roleMiddleware(["admin", "superadmin"]),
   validate(addUserSchema),
   addUser
 )
 
 router.delete("/:id", 
   authMiddleware, 
-  roleMiddleware(["admin", "god"]), 
+  roleMiddleware(["admin", "superadmin"]), 
   validate(userIdSchema),
   deleteUser
 )
 
 
-// update UserRole(only god has right to do so)
+// update UserRole(only superadmin has right to do so)
 router.patch("/:id/role",
   authMiddleware,
-  roleMiddleware(["god"]),
+  roleMiddleware(["superadmin"]),
   validate(updateUserRoleSchema),
   updateUserRole
 )
@@ -64,7 +68,7 @@ router.patch("/:id/role",
 // verify account
 router.patch("/:id/verify",
   authMiddleware,
-  roleMiddleware(["god","admin"]),
+  roleMiddleware(["superadmin","admin"]),
   validate(userIdSchema),
   verifyUser
 )
@@ -73,10 +77,14 @@ router.patch("/:id/verify",
 // suspend user
 router.patch("/:id/suspend",
   authMiddleware,
-  roleMiddleware(["god","admin"]),
+  roleMiddleware(["superadmin","admin"]),
   validate(userIdSchema),
   suspendUser
 )
-
+router.post(
+  "/promote",
+  validate(promoteUserSchema),
+  promoteUser
+)
 
 export default router

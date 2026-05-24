@@ -12,8 +12,8 @@ Vote.belongsTo(User, { foreignKey: "voter_id" });
 /*
 Election → Candidates
 */
-Election.hasMany(Candidate, { foreignKey: "election_id" });
-Candidate.belongsTo(Election, { foreignKey: "election_id" });
+Election.hasMany(Candidate, { foreignKey: "election_id", constraints: false });
+Candidate.belongsTo(Election, { foreignKey: "election_id", constraints: false });
 
 /*
 Candidate → Votes

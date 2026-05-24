@@ -1,184 +1,217 @@
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
+/* ===============================
+   ONLINE VOTING SYSTEM THEME
+=================================*/
 
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
+:root {
+  --primary: #1E3A8A;
+  --primary-light: #2563EB;
+
+  --background: #F8FAFC;
+  --card: #FFFFFF;
+
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+
+  --success: #16A34A;
+  --danger: #DC2626;
+
+  --border: #E2E8F0;
+  --shadow: 0 8px 30px rgba(0,0,0,0.06);
 }
 
-.hero {
-  position: relative;
+/* ===============================
+   BASE RESET
+=================================*/
 
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: var(--background);
+  color: var(--text-main);
 }
 
-#center {
+* {
+  box-sizing: border-box;
+}
+
+/* ===============================
+   AUTH CARD
+=================================*/
+
+.auth-container {
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+  justify-content: center;
+  align-items: center;
+  background: var(--background);
+  padding: 20px;
 }
 
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-}
-
-#next-steps ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
-}
-
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
-}
-
-.ticks {
-  position: relative;
+.auth-card {
   width: 100%;
+  max-width: 420px;
+  background: var(--card);
+  border-radius: 14px;
+  padding: 32px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
-  }
+/* ===============================
+   HEADINGS
+=================================*/
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
-  }
+.auth-title {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.auth-subtitle {
+  text-align: center;
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-size: 14px;
+}
+
+/* ===============================
+   INPUT FIELD
+=================================*/
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  display: block;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  outline: none;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.form-input:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+}
+
+/* ===============================
+   BUTTON
+=================================*/
+
+.primary-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--primary);
+  border: none;
+  color: white;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.primary-btn:hover {
+  background: var(--primary-light);
+}
+
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===============================
+   ERROR MESSAGE
+=================================*/
+
+.error-box {
+  background: #fee2e2;
+  color: var(--danger);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+
+/* ===============================
+   LINKS
+=================================*/
+
+.auth-link {
+  color: var(--primary-light);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+/* ===============================
+   CHECKBOX ROW
+=================================*/
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+/* ===============================
+   DASHBOARD CARD (Reusable)
+=================================*/
+
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+/* ===============================
+   NAVBAR
+=================================*/
+
+.navbar {
+  height: 64px;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  justify-content: space-between;
+}
+
+.logo {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* ===============================
+   VOTE BUTTON
+=================================*/
+
+.vote-btn {
+  background: var(--success);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.vote-btn:hover {
+  background: #15803d;
 }

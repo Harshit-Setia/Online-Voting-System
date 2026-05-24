@@ -7,17 +7,20 @@ import { addCandidateSchema, candidateIdSchema, getCandidatesSchema } from "./ca
 import {
     addCandidate,
     deleteCandidate,
-    getCandidates
+    getCandidates,
+    updateCandidate
 } from "./candidate.controller.js"
 
 
 const router = express.Router()
 
-// admin & god
-router.post("/", authMiddleware, roleMiddleware(["admin", "god"]), upload.single("photo"), validate(addCandidateSchema), addCandidate)
-router.delete("/:id", authMiddleware, roleMiddleware(["admin", "god"]), validate(candidateIdSchema), deleteCandidate)
+// admin & superadmin
+router.post("/", authMiddleware, roleMiddleware(["admin", "superadmin"]), upload.single("photo"), validate(addCandidateSchema), addCandidate)
+router.delete("/:id", authMiddleware, roleMiddleware(["admin", "superadmin"]), validate(candidateIdSchema), deleteCandidate)
 
 // public
 router.get("/:electionId", validate(getCandidatesSchema), getCandidates)
+
+router.put('/:id', authMiddleware, roleMiddleware(["admin", "superadmin"]), validate(candidateIdSchema), updateCandidate)
 
 export default router

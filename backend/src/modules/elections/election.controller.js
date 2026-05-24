@@ -49,3 +49,29 @@ export const endElection=async (req, res, next) => {
         next(error)
     }
 }
+
+export const deleteElection = async (req, res, next) => {
+  try {
+    const election = await electionService.getElectionById(req.params.id);
+    await election.destroy();
+    res.json({ message: 'Election deleted' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateElection = async (req, res, next) => {
+  try {
+    const { start_time, end_time } = req.body
+    if (start_time) {
+      req.body.start_time = toUTC(start_time)
+    }
+    if (end_time) {
+      req.body.end_time = toUTC(end_time)
+    }
+    const election = await electionService.updateElection(req.params.id, req.body)
+    res.json({ message: "Election updated", election })
+  } catch (error) {
+    next(error)
+  }
+}

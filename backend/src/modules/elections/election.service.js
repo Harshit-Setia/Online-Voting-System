@@ -79,3 +79,21 @@ export const endElection=async(id)=>{
 
     return election
 }
+
+// update election (admin)
+export const updateElection = async (id, updates) => {
+    const election = await Election.findByPk(id)
+    if (!election) {
+        throw new AppError("Election not found", 404)
+    }
+
+    const newStartTime = updates.start_time !== undefined ? updates.start_time : election.start_time
+    const newEndTime = updates.end_time !== undefined ? updates.end_time : election.end_time
+
+    if (new Date(newStartTime) >= new Date(newEndTime)) {
+        throw new AppError("Start time must be before end time", 400)
+    }
+
+    await election.update(updates)
+    return election
+}
