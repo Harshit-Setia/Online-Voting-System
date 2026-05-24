@@ -29,7 +29,7 @@ export const api = async ({
     const res = await fetch(url, fetchOptions);
     // Attempt to parse JSON only if response has body
     let json;
-    const contentType = res.headers.get('content-type') || '';
+    const contentType = (res.headers && typeof res.headers.get === 'function' && res.headers.get('content-type')) || '';
     if (contentType.includes('application/json')) {
       try {
         json = await res.json();
